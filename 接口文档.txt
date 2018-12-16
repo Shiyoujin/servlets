@@ -1,0 +1,7 @@
+请求url：http://localhost:8080/demoA
+参数：username，password
+username：username password：password
+请求方式：get
+注册成功返回  "<h1>恭喜你！登录成功！进入了学生管理系统！</h1>"
+失败返回 "<h1>登录失败！用户名错误！</h1>"
+失败返回 "<h1>登录失败！用户名/密码错误！</h1>"
