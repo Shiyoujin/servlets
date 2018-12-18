@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -33,7 +31,6 @@ class Request extends Thread {
         }
         while (error.size() > 0) {
             for (Iterator<Integer> integerIterator = error.iterator(); integerIterator.hasNext();) {
-                error = new ArrayList<>();
                 sendRequest(integerIterator.next());
             }
         }
@@ -54,7 +51,6 @@ class Request extends Thread {
             conn.setReadTimeout(3000);
             conn.setRequestMethod("GET");
             conn.setRequestProperty("accept", "*/*");
-//                conn.setRequestProperty("connection", "Keep-Alive");
             conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
             // 发送POST请求必须设置如下两行
             conn.setDoOutput(true);
@@ -63,30 +59,31 @@ class Request extends Thread {
             conn.connect();
             // 获取HttpURLConnection对象对应的输出流
             out = new PrintWriter(conn.getOutputStream());
-            //发送请求参数
-            //out.print(Param)
-//          // flush输出流的缓冲
+           // flush输出流的缓冲
             out.flush();
             // 定义BufferedReader输入流来读取URL的响应
             in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             // 还有下面数据库的链接也要注意
             // 发送请求参数
-//            out.print(param);
+
             //对数据进行访问
             String line = null;
             while ((line = in.readLine()) != null) {
                 result += line;
             }
-//            System.out.println(result + "   " + start);
+
             conn.disconnect();
             JSONObject jsObject = JSONObject.fromObject(result);
-            JSONArray jsonArray = JSONArray.fromObject(jsObject.get("returnData"));
+            JSONArray jsonArray = JSONArray.fromObject(jsObject.getString("returnData"));
+
             int exist = 0;
-            if (jsonArray.size() != 0) {
+            if (jsonArray.size() != 0)
+            {
                 exist = 1;
             }
             int resultCode = JDBCOperation.startSave(start, exist);
-            if (resultCode != 0) {
+            if (resultCode != 0)
+            {
                 error.add(resultCode);
             }
         } catch (Exception e ) {
@@ -111,7 +108,8 @@ class JDBCOperation {
         private int xh;
         private int Yn;
 
-        public Student(int xh, int Yn) {
+        public Student(int xh, int Yn)
+        {
             this.xh = xh;
             this.Yn = Yn;
         }
@@ -128,19 +126,13 @@ class JDBCOperation {
     //创建数据库链接
     private static Connection getConn() throws Exception {
         Connection conn = null;
-//        try {
             //加载 JDBC 的驱动
             Class.forName("com.mysql.cj.jdbc.Driver");// String driverName = "com.mysql.cj.jdbc.Driver";    也可以这么分开写
-            //Class.forName(driverName); //classLoader,加载对应驱动
+                                                         //Class.forName(driverName); //classLoader,加载对应驱动
 
             //对外提供一个链接数据库的方法, student 为数据库名，其后为数据库设置了  UTF-8和 时区，不然 中文会乱码
             conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/student?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8", "root", "");
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-        return conn;
+            return conn;
     }
 
     //设置 prepareStatement对象 insert
@@ -151,8 +143,9 @@ class JDBCOperation {
         } catch (Exception e) {
             return student.xh;
         }
+
         String sql = "insert into nianji (xh,yn)values(?,?)";
-//        PreparedStatement pstmt;
+
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);    //创建预处理对象
             pstmt.setInt(1,student.getXh());
@@ -168,7 +161,7 @@ class JDBCOperation {
 
     public static int startSave (int xh, int exist) {
         reentrantLock.lock();
-        int xH = insert(new JDBCOperation.Student(xh, exist));
+        int xH = JDBCOperation.insert(new JDBCOperation.Student(xh, exist));
         reentrantLock.unlock();
         return xH;
     }

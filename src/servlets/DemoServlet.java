@@ -9,7 +9,7 @@ import java.io.IOException;
         @Override
         public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
             String key = request.getParameter("key");
-            response.getWriter().write(key);
+            response.getWriter().write("Hello"+key);
         }
     }
 
